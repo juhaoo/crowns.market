@@ -14,7 +14,7 @@ const fetchRobePage = async (ids: string[]) => {
 
   const res = await fetch(url, {
     headers: {
-      'X-API-KEY': apiKey,
+      // 'X-API-KEY': apiKey,
     },
   })
   const json: OpenseaResponse = await res.json()
