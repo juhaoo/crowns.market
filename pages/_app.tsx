@@ -14,7 +14,7 @@ function Robes({ Component, pageProps }) {
         `}
       </style>
       <Head>
-        <title>robes.market</title>
+        <title>crowns.market</title>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;600;700&display=swap"
@@ -23,7 +23,7 @@ function Robes({ Component, pageProps }) {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:creator" content="@worm_emoji" />
         <meta property="og:url" content="https://robes.market" />
-        <meta property="og:title" content="robes.market" />
+        <meta property="og:title" content="crowns.market" />
         <link rel="icon" type="image/png" href="/favicon.png" />
         <meta
           property="og:description"
