@@ -4,19 +4,9 @@ import { chunk, flatten, orderBy } from 'lodash'
 import { utils as etherUtils, BigNumber } from 'ethers'
 import type { OpenseaResponse, Asset } from '../../../utils/openseaTypes'
 import RobeIDs from '../../../data/robes-ids.json'
-import CrownData from '../../../data/crown-data.json'
-import { itemRarity, rarityImage, RarityLevel, rarityLevels } from 'loot-rarity'
 
 const chunked = chunk(RobeIDs, 20)
 const apiKey = process.env.OPENSEA_API_KEY
-
-type RarityData = {
-  raritySVG: string;
-  rarityLevel: RarityLevel;
-  crown: string;
-}
-
-const rarityCache: Map<string,RarityData> = new Map<string, RarityData>()
 
 const fetchRobePage = async (ids: string[]) => {
   let url = 'https://api.opensea.io/api/v1/assets?collection=lootproject&'
@@ -36,7 +26,6 @@ export interface RobeInfo {
   price: Number
   url: string
   svg: string
-  rarity?: RarityData
 }
 
 export const fetchRobes = async () => {
@@ -61,41 +50,10 @@ export const fetchRobes = async () => {
         svg: a.image_url,
       }
     })
-  const withRarity = await pMap(mapped, enrichWithRarity, { concurrency: 2 })
   return {
-    robes: orderBy(withRarity, ['price', 'id'], ['asc', 'asc']),
+    robes: orderBy(mapped, ['price', 'id'], ['asc', 'asc']),
     lastUpdate: new Date().toISOString(),
   }
-}
-
-const enrichWithRarity = async (r: RobeInfo): Promise<RobeInfo> => {
-    try {
-      if (rarityCache.has(r.id)) {
-        const rarity = rarityCache.get(r.id)
-        return {
-          ...r,
-          rarity
-        }
-      }
-      const res = await fetch(r.svg)
-      const data = await res.text()
-      const raritySVG = await rarityImage(data, {displayLevels: true})
-      const crown = CrownData[r.id];
-      const level = itemRarity(crown) || 1;
-
-      const rarity: RarityData = {
-        rarityLevel: level,
-        raritySVG,
-        crown
-      }
-      rarityCache.set(r.id, rarity)
-      return {
-        ...r,
-        rarity
-      }
-    } catch (e) {
-      return r
-    }
 }
 
 const handler = async (_req: NextApiRequest, res: NextApiResponse) => {
