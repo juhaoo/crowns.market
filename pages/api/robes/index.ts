@@ -4,19 +4,12 @@ import { chunk, flatten, orderBy } from 'lodash'
 import { utils as etherUtils, BigNumber } from 'ethers'
 import type { OpenseaResponse, Asset } from '../../../utils/openseaTypes'
 import RobeIDs from '../../../data/robes-ids.json'
-import CrownData from '../../../data/crown-data.json'
-import { itemRarity, rarityImage, RarityLevel, rarityLevels } from 'loot-rarity'
+import { rarityImage } from 'loot-rarity'
 
 const chunked = chunk(RobeIDs, 20)
 const apiKey = process.env.OPENSEA_API_KEY
 
-type RarityData = {
-  raritySVG: string;
-  rarityLevel: RarityLevel;
-  crown: string;
-}
-
-const rarityCache: Map<string,RarityData> = new Map<string, RarityData>()
+const rarityCache = {}
 
 const fetchRobePage = async (ids: string[]) => {
   let url = 'https://api.opensea.io/api/v1/assets?collection=lootproject&'
@@ -36,7 +29,7 @@ export interface RobeInfo {
   price: Number
   url: string
   svg: string
-  rarity?: RarityData
+  raritySVG?: string 
 }
 
 export const fetchRobes = async () => {
@@ -70,28 +63,19 @@ export const fetchRobes = async () => {
 
 const enrichWithRarity = async (r: RobeInfo): Promise<RobeInfo> => {
     try {
-      if (rarityCache.has(r.id)) {
-        const rarity = rarityCache.get(r.id)
+      if (rarityCache[r.id]) {
         return {
           ...r,
-          rarity
+          raritySVG: rarityCache[r.id]
         }
       }
       const res = await fetch(r.svg)
       const data = await res.text()
       const raritySVG = await rarityImage(data, {displayLevels: true})
-      const crown = CrownData[r.id];
-      const level = itemRarity(crown) || 1;
-
-      const rarity: RarityData = {
-        rarityLevel: level,
-        raritySVG,
-        crown
-      }
-      rarityCache.set(r.id, rarity)
+      rarityCache[r.id] = raritySVG
       return {
         ...r,
-        rarity
+        raritySVG
       }
     } catch (e) {
       return r
