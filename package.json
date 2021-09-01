@@ -3,7 +3,7 @@
   "scripts": {
     "dev": "next",
     "build": "next build",
-    "start": "next start",
+    "start": "node_modules/next/dist/bin/next start -p $PORT",
     "type-check": "tsc"
   },
   "dependencies": {
